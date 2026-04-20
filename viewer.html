@@ -1,46 +1,34 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <title>Display and Transform XML</title>
-  <script type="text/javascript">
-    function display() {
-      // 改成你实际的文件名（和 html 放在同一个文件夹）
-      var xmlURL = "https://raw.githubusercontent.com/Ace-v-7/xml/refs/heads/main/badges.xml";
-      var xmlURL = "style.xsl";
+function display() {
+    var xmlURL = "https://raw.githubusercontent.com/Ace-v-7/xml/refs/heads/main/badges.xml";
+    var xslURL = "style.xsl";   // 建议也改成绝对 URL，或者确保 xsl 也在同源可访问位置
 
-      var request;
-      try {
-        if (window.XMLHttpRequest) {
-          request = new XMLHttpRequest();
-        } else {
-          request = new ActiveXObject("Microsoft.XMLHTTP");
-        }
-        // 加载 XML
-        request.open("GET", xmlURL, false);
-        request.send();
-        var xmlDoc = request.responseXML;
-        // 加载 XSLT
-        request.open("GET", xmlstyleURL, false);
-        request.send();
-        var xslDoc = request.responseXML;
-
-        // 转换并显示
-        if (window.ActiveXObject) {
-          var result = xmlDoc.transformNode(xslDoc);
-          document.getElementById("output").innerHTML = result;
-        } else {
-          var processor = new XSLTProcessor();
-          processor.importStylesheet(xslDoc);
-          var fragment = processor.transformToFragment(xmlDoc, document);
-          document.getElementById("output").appendChild(fragment);
-        }
-      } catch (err) {
-        alert("错误：" + err);
-      }
+    function loadXML(url) {
+        var req = new XMLHttpRequest();
+        req.open("GET", url, false);
+        req.send();
+        if (req.status !== 200) throw new Error("HTTP " + req.status + " 加载 " + url);
+        var doc = req.responseXML;
+        if (!doc || !doc.documentElement) throw new Error("无法解析 XML: " + url);
+        return doc;
     }
-  </script>
-</head>
-<body onload="display()">
-  <div id="output"></div>
-</body>
-</html>
+
+    try {
+        var xmlDoc = loadXML(xmlURL);
+        var xslDoc = loadXML(xslURL);   // 注意：如果 xslURL 是相对路径，必须与 html 同源
+
+        var output = document.getElementById("output");
+        output.innerHTML = ""; // 清空
+
+        if (window.ActiveXObject) {
+            var result = xmlDoc.transformNode(xslDoc);
+            output.innerHTML = result;
+        } else {
+            var processor = new XSLTProcessor();
+            processor.importStylesheet(xslDoc);
+            var fragment = processor.transformToFragment(xmlDoc, document);
+            output.appendChild(fragment);
+        }
+    } catch (err) {
+        document.getElementById("output").innerHTML = "<p style='color:red'>错误：" + err.message + "</p>";
+    }
+}
