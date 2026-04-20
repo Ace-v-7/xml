@@ -4,7 +4,7 @@
   <title>Display and Transform XML</title>
   <script type="text/javascript">
     function display() {
-      // 改成你实际的文件名（和 html 放在同一个文件夹）
+      
       var xmlURL = "https://raw.githubusercontent.com/Ace-v-7/xml/refs/heads/main/badges.xml";
       var xmlstyleURL = "style.xsl";
 
@@ -15,16 +15,16 @@
         } else {
           request = new ActiveXObject("Microsoft.XMLHTTP");
         }
-        // 加载 XML
+        
         request.open("GET", xmlURL, false);
         request.send();
         var xmlDoc = request.responseXML;
-        // 加载 XSLT
+        
         request.open("GET", xmlstyleURL, false);
         request.send();
         var xslDoc = request.responseXML;
 
-        // 转换并显示
+        
         if (window.ActiveXObject) {
           var result = xmlDoc.transformNode(xslDoc);
           document.getElementById("output").innerHTML = result;
